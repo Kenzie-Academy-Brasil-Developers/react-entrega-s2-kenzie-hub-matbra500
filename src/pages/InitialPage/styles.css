@@ -1,0 +1,12 @@
+.flex-buttons{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+}
+
+.flex-buttons > div > button{
+    margin: 10px;
+    width: 100px;
+}
