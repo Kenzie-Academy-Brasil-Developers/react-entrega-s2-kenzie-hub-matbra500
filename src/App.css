@@ -20,4 +20,15 @@
 
 .whitespace{
   height: 30px;
+  width: 30px;
 }
+
+.logout{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+
+}
+
+

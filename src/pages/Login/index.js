@@ -18,9 +18,11 @@ import {
   FormControl,
   Button,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
+import api from "../../services/api";
+import toast from "react-hot-toast";
 
-function Login() {
+function Login({ authenticated, setAuthenticated }) {
   const formSchema = yup.object().shape({
     email: yup.string().required("E-mail obrigatória").email("E-mail inválida"),
     password: yup.string().required("Senha obrigatória"),
@@ -36,19 +38,28 @@ function Login() {
   });
   console.log(errors);
 
-  const [userData, setUserData] = useState({});
   const history = useHistory();
 
   const onSubmitFunction = (data) => {
-    setUserData(data);
-    //localStorage.setItem("nomeUsuario", data.username);
-    // reset();
-    // setValues({
-    //   ...values,
-    //   password: "",
-    // });
+    reset();
+    setValues({
+      ...values,
+      password: "",
+    });
     console.log(data);
-    console.log(localStorage);
+
+    api
+      .post("/sessions", data)
+      .then((response) => {
+        const { token } = response.data;
+
+        localStorage.setItem("@Kenziehub:token", JSON.stringify(token));
+
+        setAuthenticated(true);
+
+        return history.push("/dashboard");
+      })
+      .catch((err) => toast.error("Email ou senha inválidos"));
   };
 
   const [values, setValues] = useState({
@@ -74,6 +85,9 @@ function Login() {
     event.preventDefault();
   };
 
+  if (authenticated) {
+    return <Redirect to="/dashboard" />;
+  }
   return (
     <FormContainer>
       <Box

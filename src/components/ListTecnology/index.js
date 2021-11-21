@@ -1,10 +1,10 @@
 import { Button } from "@mui/material";
-import { Header, Container, Card } from "./styles";
-import Modify from "../Modify";
+import { Header, Container, ContainerItens, Card } from "./styles";
+import ModifyTecnology from "../ModifyTecnology";
 import { useState } from "react";
 import { GiTechnoHeart } from "react-icons/gi";
 import { MdDelete } from "react-icons/md";
-function List({ title }) {
+function ListTecnology({ title, color }) {
   const [displayModify, setDisplayModify] = useState(false);
 
   const [tecnologies, setTecnologies] = useState([]);
@@ -36,18 +36,19 @@ function List({ title }) {
             onClick={() => toggle()}
             size="small"
             variant="contained"
-            color="secondary"
+            color={color}
             type="button"
           >
             +
           </Button>
-          <Modify
+          <ModifyTecnology
             state={displayModify}
             callbackRemove={toggle}
             callback={addTecnology}
           />
         </div>
       </Header>
+      <ContainerItens>
       {tecnologies.map((tecnology, index) => {
         return (
           <Card key={index}>
@@ -64,8 +65,9 @@ function List({ title }) {
           </Card>
         );
       })}
+      </ContainerItens>
     </Container>
   );
 }
 
-export default List;
+export default ListTecnology;

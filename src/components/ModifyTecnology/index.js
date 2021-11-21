@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormContainer, CancelButton } from "./styles";
-import { useHistory } from "react-router-dom";
 import {
   Box,
   TextField,
@@ -16,7 +15,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import { FiDelete } from "react-icons/fi";
 
-function Modify({ callback, callbackRemove, state }) {
+function ModifyTecnology({ callback, callbackRemove, state }) {
   const formSchema = yup.object().shape({
     tecnology: yup.string().required("Insira uma tecnologia"),
     status: yup.string().required("Especifique sua habilidade"),
@@ -30,8 +29,6 @@ function Modify({ callback, callbackRemove, state }) {
   } = useForm({
     resolver: yupResolver(formSchema),
   });
-
-  const history = useHistory();
 
   const onSubmitFunction = (data) => {
     callback(data);
@@ -63,15 +60,19 @@ function Modify({ callback, callbackRemove, state }) {
             {...register("tecnology")}
             error={errors.tecnology?.message}
             helperText={errors.tecnology?.message}
+            color="secondary"
           />
 
           <FormControl error={errors.status?.message}>
-            <InputLabel id="demo-simple-select-label">Status</InputLabel>
+            <InputLabel color="secondary" id="demo-simple-select-label">
+              Status
+            </InputLabel>
             <Select
               {...register("status")}
               labelId="demo-simple-select-label"
               id="demo-simple-select"
               label="Status"
+              color="secondary"
             >
               <MenuItem value={"Iniciante"}>Iniciante</MenuItem>
               <MenuItem value={"Intermediário"}>Intermediário</MenuItem>
@@ -95,4 +96,4 @@ function Modify({ callback, callbackRemove, state }) {
     return null;
   }
 }
-export default Modify;
+export default ModifyTecnology;

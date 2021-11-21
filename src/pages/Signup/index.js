@@ -20,13 +20,15 @@ import {
 } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
+import api from "../../services/api";
+import toast from "react-hot-toast";
 
-const Signup = () => {
+const Signup = ({ authenticated }) => {
   const formSchema = yup.object().shape({
-    username: yup
+    name: yup
       .string()
-      .required("Username obrigatório")
+      .required("Nome obrigatório")
       .matches(/^[aA-zZ\s]+$/, "Somente letras"),
     email: yup.string().required("E-mail obrigatória").email("E-mail inválida"),
     password: yup
@@ -40,10 +42,7 @@ const Signup = () => {
       .string()
       .required("Confirmação de senha obrigatória")
       .oneOf([yup.ref("password"), null], "As senhas não estão iguais"),
-    contact: yup
-      .string()
-      .required("Celular obrigatório")
-      .matches(/^\d{10}[0-9]$/, "Inserir DDD + telefone"),
+    contact: yup.string().required("Contato obrigatório"),
     course_module: yup.string().required("Módulo obrigatório"),
     bio: yup.string().required("Bio obrigatória"),
   });
@@ -58,21 +57,28 @@ const Signup = () => {
   });
   console.log(errors);
 
-  const [userData, setUserData] = useState({});
   const history = useHistory();
 
   const onSubmitFunction = (data) => {
     delete data.confirmPassword;
-    setUserData(data);
-    localStorage.setItem("nomeUsuario", data.username);
-    // reset();
-    // setValues({
-    //   ...values,
-    //   password: "",
-    // });
-    console.log(data);
-    console.log(localStorage);
-  };
+    
+    api
+    .post("/users", data)
+    .then((response) => {
+      toast.success("Sucesso ao criar usuário");
+        console.log(response)
+        return history.push("/login");
+      })
+      .catch((err) => {
+        toast.error("Esse e-mail já existe")
+        console.log(err)
+      });
+      reset();
+      setValues({
+        ...values,
+        password: "",
+      });
+    };
 
   const [values, setValues] = useState({
     amount: "",
@@ -97,6 +103,10 @@ const Signup = () => {
     event.preventDefault();
   };
 
+  if (authenticated) {
+    return <Redirect to="/dashboard" />;
+  }
+
   return (
     <FormContainer>
       <Box
@@ -113,7 +123,7 @@ const Signup = () => {
           id="outlined-basic"
           label="Nome"
           variant="outlined"
-          {...register("username")}
+          {...register("name")}
           error={errors.username?.message}
           helperText={errors.username?.message}
         />
@@ -136,30 +146,34 @@ const Signup = () => {
         <TextField
           className="name"
           id="outlined-basic"
-          label="Celular"
+          label="Contato"
           variant="outlined"
           {...register("contact")}
-          error={errors.cellphone?.message}
-          helperText={errors.cellphone?.message}
+          error={errors.contact?.message}
+          helperText={errors.contact?.message}
         />
-        <FormControl error={errors.modulo?.message ? true : false}>
-          <InputLabel
-            {...register("course_module")}
-            id="demo-simple-select-label"
-          >
-            Módulo
-          </InputLabel>
+        <FormControl error={errors.course_module?.message}>
+          <InputLabel id="demo-simple-select-label">Módulo</InputLabel>
           <Select
+            {...register("course_module")}
             labelId="demo-simple-select-label"
             id="demo-simple-select"
             label="Módulo"
           >
-            <MenuItem value={1}>Primeiro</MenuItem>
-            <MenuItem value={2}>Segundo</MenuItem>
-            <MenuItem value={3}>Terceiro</MenuItem>
-            <MenuItem value={4}>Quarto</MenuItem>
+            <MenuItem value={"Primeiro módulo (Introdução ao Frontend)"}>
+              Primeiro
+            </MenuItem>
+            <MenuItem value={"Segundo módulo (Frontend Avançado)"}>
+              Segundo
+            </MenuItem>
+            <MenuItem value={"Terceiro módulo (Introdução ao Backend)"}>
+              Terceiro
+            </MenuItem>
+            <MenuItem value={"Quarto módulo (Backend Avançado)"}>
+              Quarto
+            </MenuItem>
           </Select>
-          <FormHelperText>{errors.modulo?.message}</FormHelperText>
+          <FormHelperText>{errors.course_module?.message}</FormHelperText>
         </FormControl>
         <FormControl
           error={errors.password?.message ? true : false}
