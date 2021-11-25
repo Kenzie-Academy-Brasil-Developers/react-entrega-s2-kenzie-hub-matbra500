@@ -14,10 +14,22 @@ import {
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import { FiDelete } from "react-icons/fi";
+import api from "../../services/api";
+import toast from "react-hot-toast";
 
-function ModifyTecnology({ callback, callbackRemove, state }) {
+function ModifyTecnology({
+  displayModify,
+  setDisplayModify,
+  existing,
+  setExisting,
+  tecnologies,
+  setTecnologies,
+}) {
+  const token = JSON.parse(localStorage.getItem("@Kenziehub:token"));
+  const userId = localStorage.getItem("@Kenziehub:userID");
+
   const formSchema = yup.object().shape({
-    tecnology: yup.string().required("Insira uma tecnologia"),
+    tecnology: yup.string().required("Insira uma tecnologia").default('Tech'),
     status: yup.string().required("Especifique sua habilidade"),
   });
 
@@ -30,16 +42,85 @@ function ModifyTecnology({ callback, callbackRemove, state }) {
     resolver: yupResolver(formSchema),
   });
 
-  const onSubmitFunction = (data) => {
-    callback(data);
+  function toggle() {
+    setDisplayModify(!displayModify);
+  }
+
+  function toggleExisting() {
+    toggle();
+    setExisting("");
     reset();
+  }
+
+  const onSubmitFunction = (data) => {
+    console.log(data.tecnology);
+
+    api
+      .post(
+        "users/techs",
+        {
+          title: data.tecnology,
+          status: data.status,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .then((response) => {
+        console.log(response);
+        toast.success("Sucesso ao cadastrar tecnologia");
+        reset();
+        toggle();
+        loadTechs();
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Erro ao cadastrar tecnologia");
+      });
   };
 
-  if (state === true) {
+  function onSubmitModify(data) {
+    delete data.tecnology;
+
+    api
+      .put(
+        `users/techs/${existing}`,
+        {
+          status: data.status,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .then((response) => {
+        console.log(response);
+        toast.success("Sucesso ao modificar projeto");
+        reset();
+        toggleExisting();
+        loadTechs();
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Erro ao modificar projeto");
+      });
+  }
+
+  function loadTechs() {
+    api.get(`users/${userId}`).then((response) => {
+      const techs = response.data.techs;
+      setTecnologies(techs);
+    });
+  }
+
+  if (displayModify === true) {
     return (
       <FormContainer>
         <Box
-          onSubmit={handleSubmit(onSubmitFunction)}
+          onSubmit={
+            existing !== ""
+              ? handleSubmit(onSubmitModify)
+              : handleSubmit(onSubmitFunction)
+          }
           component="form"
           sx={{
             "& > :not(style)": { m: 1, width: "290px" },
@@ -48,7 +129,7 @@ function ModifyTecnology({ callback, callbackRemove, state }) {
           autoComplete="on"
         >
           <div>
-            <CancelButton type="button" onClick={() => callbackRemove()}>
+            <CancelButton type="button" onClick={() => toggleExisting()}>
               <FiDelete />
             </CancelButton>
           </div>
@@ -58,9 +139,13 @@ function ModifyTecnology({ callback, callbackRemove, state }) {
             label="Inserir tecnologia"
             variant="outlined"
             {...register("tecnology")}
-            error={errors.tecnology?.message}
-            helperText={errors.tecnology?.message}
+            error={!existing ? errors.tecnology?.message : ""}
+            helperText={!existing ? errors.tecnology?.message : ""}
             color="secondary"
+            defaultValue={
+              existing !== "" ? "Pode modificar somente o status" : ""
+            }
+            disabled={existing}
           />
 
           <FormControl error={errors.status?.message}>
@@ -86,6 +171,7 @@ function ModifyTecnology({ callback, callbackRemove, state }) {
             type="submit"
             variant="contained"
             size="medium"
+            color ='secondary'
           >
             Inserir
           </Button>

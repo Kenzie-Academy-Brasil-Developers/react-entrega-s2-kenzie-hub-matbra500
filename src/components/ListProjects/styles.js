@@ -23,6 +23,7 @@ export const Header = styled.div`
   align-items: center;
   justify-content: center;
   margin-top: 20px;
+  padding-bottom:10px;
 
   .list-title {
     display: flex;
@@ -78,14 +79,18 @@ export const Card = styled.div`
     flex-grow: 2;
     h2 {
       padding-bottom: 10px;
+      cursor: pointer;
+      :hover {
+        text-decoration: underline;
+      }
     }
     div {
       height: 40px;
       display: flex;
       overflow-wrap: anywhere;
       overflow-y: scroll;
-      scrollbar-width: none; 
-      -ms-overflow-style: none; 
+      scrollbar-width: none;
+      -ms-overflow-style: none;
 
       ::-webkit-scrollbar {
         width: 0px;

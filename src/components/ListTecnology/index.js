@@ -1,29 +1,61 @@
 import { Button } from "@mui/material";
 import { Header, Container, ContainerItens, Card } from "./styles";
 import ModifyTecnology from "../ModifyTecnology";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GiTechnoHeart } from "react-icons/gi";
 import { MdDelete } from "react-icons/md";
+import toast from "react-hot-toast";
+import api from "../../services/api";
+
 function ListTecnology({ title, color }) {
+  const token = JSON.parse(localStorage.getItem("@Kenziehub:token"));
+  const userId = localStorage.getItem("@Kenziehub:userID");
+
   const [displayModify, setDisplayModify] = useState(false);
 
   const [tecnologies, setTecnologies] = useState([]);
+  const [existing, setExisting] = useState('')
+
+
+  console.log(userId);
+
+  function loadTechs() {
+    api.get(`users/${userId}`).then((response) => {
+      const techs = response.data.techs;
+      setTecnologies(techs);
+    });
+  }
+
+  useEffect(() => {
+    loadTechs();
+  }, []);
 
   function toggle() {
     setDisplayModify(!displayModify);
   }
 
-  function addTecnology(inputObject) {
-    setTecnologies([...tecnologies, inputObject]);
-    toggle();
+  function modifyExisting(id){
+    toggle()
+    setExisting(id)
   }
 
-  function remove(tecnology) {
-    const filtered = tecnologies.filter((card) => card.tecnology !== tecnology);
-    setTecnologies(filtered);
-  }
+  function remove(id) {
+    const filtered = tecnologies.filter((tech) => tech.id !== id);
 
-  console.log(tecnologies);
+    api
+      .delete(`/users/techs/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        console.log(response);
+        toast.success("Sucesso ao eliminar tecnologia");
+        setTecnologies(filtered);
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Erro ao eliminar tecnologia");
+      });
+  }
 
   return (
     <Container>
@@ -42,29 +74,32 @@ function ListTecnology({ title, color }) {
             +
           </Button>
           <ModifyTecnology
-            state={displayModify}
-            callbackRemove={toggle}
-            callback={addTecnology}
+            displayModify={displayModify}
+            setDisplayModify={setDisplayModify}
+            existing={existing}
+            setExisting={setExisting}
+            tecnologies={tecnologies}
+            setTecnologies={setTecnologies}
           />
         </div>
       </Header>
       <ContainerItens>
-      {tecnologies.map((tecnology, index) => {
-        return (
-          <Card key={index}>
-            <div className="card-image">
-              <GiTechnoHeart style={{ color: "white", fontSize: "27px" }} />
-            </div>
-            <div className="card-description">
-              <h2>{tecnology.tecnology}</h2>
-              <h4>{tecnology.status}</h4>
-            </div>
-            <button onClick={() => remove(tecnology.tecnology)}>
-              <MdDelete />
-            </button>
-          </Card>
-        );
-      })}
+        {tecnologies.map((tech, index) => {
+          return (
+            <Card key={index}>
+              <div className="card-image">
+                <GiTechnoHeart style={{ color: "white", fontSize: "27px" }} />
+              </div>
+              <div className="card-description">
+                <h2 onClick={()=> modifyExisting(tech.id)}>{tech.title}</h2>
+                <h4>{tech.status}</h4>
+              </div>
+              <button onClick={() => remove(tech.id)}>
+                <MdDelete />
+              </button>
+            </Card>
+          );
+        })}
       </ContainerItens>
     </Container>
   );

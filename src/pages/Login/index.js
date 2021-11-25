@@ -36,7 +36,6 @@ function Login({ authenticated, setAuthenticated }) {
   } = useForm({
     resolver: yupResolver(formSchema),
   });
-  console.log(errors);
 
   const history = useHistory();
 
@@ -52,8 +51,13 @@ function Login({ authenticated, setAuthenticated }) {
       .post("/sessions", data)
       .then((response) => {
         const { token } = response.data;
+        const userId = response.data.user.id
+        
+        console.log(response)
+        console.log(response.data.user.id)
 
         localStorage.setItem("@Kenziehub:token", JSON.stringify(token));
+        localStorage.setItem("@Kenziehub:userID", userId)
 
         setAuthenticated(true);
 

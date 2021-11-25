@@ -5,9 +5,7 @@ import { Redirect } from "react-router-dom";
 
 function InitialPage(authenticated) {
   const history = useHistory();
-  if (authenticated) {
-    return <Redirect to="/dashboard" />;
-  }
+  
   return (
     <div className="flex-buttons">
       <div>

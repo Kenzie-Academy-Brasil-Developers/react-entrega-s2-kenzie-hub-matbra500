@@ -23,6 +23,7 @@ export const Header = styled.div`
   align-items: center;
   justify-content: center;
   margin-top: 20px;
+  padding-bottom:10px;
 
   .list-title {
     display: flex;
@@ -74,6 +75,12 @@ export const Card = styled.div`
   .card-description {
     margin-left: 15px;
     flex-grow: 2;
+    h2 {
+      cursor: pointer;
+      :hover{
+        text-decoration: underline;
+      }
+    }
     h4 {
       color: var(--green);
       margin-top: 10px;
